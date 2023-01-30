@@ -11,10 +11,10 @@ datasource db {
 }
 
 model User {
-  id                    Int     @id @default(autoincrement())
+  id                    Int      @id @default(autoincrement())
   name                  String
   phone                 String
-  email                 String
+  email                 String   @unique
   password              String
   user_type             UserType
   created_at            DateTime @default(now())  
@@ -71,5 +71,6 @@ enum PropertyType {
 
 enum UserType {
   REALTOR
+  BUYER
   ADMIN
 }
