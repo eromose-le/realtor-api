@@ -8,3 +8,6 @@ npx prisma db push
 nest g module user
 nest g controller auth user
 nest g service auth user
+
+nest g module prisma
+nest g service prisma
