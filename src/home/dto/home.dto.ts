@@ -41,7 +41,15 @@ export class HomeResponseDto {
     return this.land_size;
   }
 
+  image: string;
+
+  @Exclude()
   property_type: PropertyType;
+
+  @Expose({ name: 'propertyType' })
+  propertyType() {
+    return this.property_type;
+  }
 
   @Exclude()
   created_at: Date;
@@ -51,6 +59,6 @@ export class HomeResponseDto {
   realtor_id: number;
 
   constructor(paritial: Partial<HomeResponseDto>) {
-    Object.assign(this, paritial)
+    Object.assign(this, paritial);
   }
 }
