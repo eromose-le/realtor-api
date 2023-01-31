@@ -1,3 +1,4 @@
+import { HomeResponseDto } from './dto/home.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable } from '@nestjs/common';
 
@@ -5,8 +6,9 @@ import { Injectable } from '@nestjs/common';
 export class HomeService {
   constructor(private readonly prismaService: PrismaService) {}
 
-  getHomes() {
-    return this.prismaService.home.findMany();
+  async getHomes(): Promise<HomeResponseDto[]> {
+    const homes = await this.prismaService.home.findMany();
+    return homes.map(home => new HomeResponseDto(home))
   }
 
   getHome() {
