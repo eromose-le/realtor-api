@@ -1,7 +1,7 @@
 import { PropertyType } from '@prisma/client';
-import { CreateHomeDto, HomeResponseDto } from './dto/home.dto';
+import { CreateHomeDto, HomeResponseDto, UpdateHomeDto } from './dto/home.dto';
 import { HomeService } from './home.service';
-import { Body, Controller, Delete, Get, Post, Put, Query } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Post, Put, Query, Param, ParseIntPipe } from '@nestjs/common';
 
 @Controller('home')
 export class HomeController {
@@ -14,11 +14,13 @@ export class HomeController {
     @Query('maxPrice') maxPrice?: string,
     @Query('propertyType') propertyType?: PropertyType,
   ): Promise<HomeResponseDto[]> {
-
-    const price = minPrice || maxPrice ? {
-      ...(minPrice && {gte: parseFloat(minPrice)}),
-      ...(maxPrice && {gte: parseFloat(maxPrice)})
-    } : undefined
+    const price =
+      minPrice || maxPrice
+        ? {
+            ...(minPrice && { gte: parseFloat(minPrice) }),
+            ...(maxPrice && { gte: parseFloat(maxPrice) }),
+          }
+        : undefined;
 
     const filters = {
       ...(city && { city }),
@@ -40,8 +42,11 @@ export class HomeController {
   }
 
   @Put(':id')
-  updateHome() {
-    return 'updated';
+  updateHome(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: UpdateHomeDto
+  ) {
+    return this.homeService.updateHomeById(id, body);
   }
 
   @Delete(':id')

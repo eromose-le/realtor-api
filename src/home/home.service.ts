@@ -23,6 +23,16 @@ interface CreateHomeParams {
   images: { url: string }[];
 }
 
+interface UpdateHomeParams {
+  address?: string;
+  numberOfBathrooms?: number;
+  numberOfBedrooms?: number;
+  city?: string;
+  price?: number;
+  landSize?: number;
+  PropertyType?: PropertyType;
+}
+
 @Injectable()
 export class HomeService {
   constructor(private readonly prismaService: PrismaService) {}
@@ -70,7 +80,7 @@ export class HomeService {
     landSize,
     price,
     PropertyType,
-    images
+    images,
   }: CreateHomeParams) {
     const home = await this.prismaService.home.create({
       data: {
@@ -78,26 +88,44 @@ export class HomeService {
         number_of_bathrooms: numberOfBathrooms,
         number_of_bedrooms: numberOfBedrooms,
         city,
-        land_size:landSize,
+        land_size: landSize,
         price,
-        property_type:PropertyType,
-        realtor_id: 6
+        property_type: PropertyType,
+        realtor_id: 6,
       },
     });
 
-    const homeImages = images.map(image => {
+    const homeImages = images.map((image) => {
       return {
-        ...image, home_id: home.id
+        ...image,
+        home_id: home.id,
       };
-    })
-    
-    await this.prismaService.image.createMany({data: homeImages})
+    });
+
+    await this.prismaService.image.createMany({ data: homeImages });
 
     return new HomeResponseDto(home);
   }
 
-  updateHome() {
-    return;
+  async updateHomeById(id: number, data: UpdateHomeParams) {
+    const home = await this.prismaService.home.findUnique({
+      where: {
+        id,
+      },
+    });
+
+    if (!home) {
+      throw new NotFoundException();
+    }
+
+    const updatedHome = await this.prismaService.home.update({
+      where: {
+        id,
+      },
+      data,
+    });
+
+    return new HomeResponseDto(updatedHome);
   }
 
   deleteHome() {
