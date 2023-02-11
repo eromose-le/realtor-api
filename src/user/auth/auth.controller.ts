@@ -11,20 +11,24 @@ import {
   Param,
   UnauthorizedException,
   ParseEnumPipe,
+  Get,
 } from '@nestjs/common';
 import { UserType } from '@prisma/client';
 import * as bcrypt from 'bcryptjs';
+import { User } from '../decorators/user.decorator';
+import { UserInterceptorType } from '../interceptors/user.interceptor';
 
 @Controller('auth')
 export class AuthController {
   constructor(private readonly authService: AuthService) {}
 
   @Post('signup/:userType')
-  async signup(@Body() body: SignupDto, @Param('userType', new ParseEnumPipe(UserType)) userType: UserType) {
+  async signup(
+    @Body() body: SignupDto,
+    @Param('userType', new ParseEnumPipe(UserType)) userType: UserType,
+  ) {
     if (userType !== UserType.BUYER) {
-      console.log('buyer')
       if (!body.productKey) {
-        console.log('body')
         throw new UnauthorizedException();
       }
 
@@ -35,7 +39,6 @@ export class AuthController {
       );
 
       if (!isValidProductKey) {
-        console.log('a')
         throw new UnauthorizedException();
       }
     }
@@ -50,5 +53,10 @@ export class AuthController {
   @Post('key')
   generateProductKey(@Body() { userType, email }: generateProductKeyDto) {
     return this.authService.generateProductKey(email, userType);
+  }
+
+  @Get('/me')
+  me(@User() user: UserInterceptorType) {
+    return user;
   }
 }
