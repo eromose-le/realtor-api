@@ -2,6 +2,7 @@ import { PropertyType } from '@prisma/client';
 import { HomeResponseDto } from './dto/home.dto';
 import { PrismaService } from 'src/prisma/prisma.service';
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { UserInterceptorType } from 'src/user/interceptors/user.interceptor';
 
 interface GetHomesParams {
   city?: string;
@@ -71,22 +72,24 @@ export class HomeService {
   async getHomeById(id: number) {
     return await this.prismaService.home.findUniqueOrThrow({
       where: {
-        id
-      }
+        id,
+      },
     });
   }
 
-  async createHome({
-    address,
-    numberOfBathrooms,
-    numberOfBedrooms,
-    city,
-    landSize,
-    price,
-    PropertyType,
-    images,
-  }: CreateHomeParams,
-  userId: number) {
+  async createHome(
+    {
+      address,
+      numberOfBathrooms,
+      numberOfBedrooms,
+      city,
+      landSize,
+      price,
+      PropertyType,
+      images,
+    }: CreateHomeParams,
+    userId: number,
+  ) {
     const home = await this.prismaService.home.create({
       data: {
         address,
@@ -170,5 +173,26 @@ export class HomeService {
     }
 
     return home.realtor;
+  }
+
+  async inquire(buyer: UserInterceptorType, homeId, message) {
+    const realtor = await this.getRealtorByHomeId(homeId);
+
+    return this.prismaService.message.create({
+      data: {
+        realtor_id: realtor.id,
+        buyer_id: buyer.id,
+        home_id: homeId,
+        message,
+      },
+    });
+  }
+
+  getMessagesByHome(homeId: number) {
+    return this.prismaService.message.findMany({
+      where: {
+        home_id: homeId
+      }
+    })
   }
 }
